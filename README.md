@@ -1,9 +1,6 @@
 Overload – customize your commands
 ==================================
 
-This repository contains various scripts I've put together for use with linux.
-
-
 Overview
 --------
 
