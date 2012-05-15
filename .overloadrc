@@ -13,10 +13,10 @@ svn_add() {
 	if [ -z "$1" ]; then
 		ARGS=$(svn st | awk '/^\?/{print $2}' | xargs)
 		if [ -n "$ARGS" ]; then
-			$ORIGINAL add $ARGS
+			$original_command add $ARGS
 		fi
 	else
-		$ORIGINAL add "$@"
+		$original_command add "$@"
 	fi
 }
 
@@ -24,32 +24,60 @@ svn_revert() {
 	if [ -z "$1" ]; then
 		ARGS=$(svn st | awk '/^M/{print $2}' | xargs)
 		if [ -n "$ARGS" ]; then
-			$ORIGINAL revert $ARGS
+			$original_command revert $ARGS
 		fi
 	else
-		$ORIGINAL revert "$@"
+		$original_command revert "$@"
 	fi
+}
+
+svn_push() {
+	for f in $(svn st | awk '/^[AM]/{print $2}'); do
+		upload $f
+	done
 }
 
 svn_del() {
 	if [ -z "$1" ]; then
 		ARGS=$(svn st | awk '/^\!/{print $2}' | xargs)
 		if [ -n "$ARGS" ]; then
-			$ORIGINAL del $ARGS
+			$original_command del $ARGS
 		fi
 	else
-		$ORIGINAL del "$@"
+		$original_command del "$@"
 	fi
 }
 
 svn_us() {
-	$ORIGINAL up "$@"
-	$ORIGINAL st "$@"
+	svn_upstatus "$@"
+}
+svn_upstatus() {
+	$original_command up "$@"
+	$original_command st "$@"
+}
+
+svn_ci() {
+	svn_commit "$@"
+}
+svn_commit() {
+	$original_command up
+	$original_command ci "$@"
+}
+
+svn_ct() {
+	svn_commit-ticket "$@"
+}
+svn_commit-ticket() {
+	ticket_number="$1"
+	shift
+	$original_command up
+	$original_command ci -m "Completed Ticket #$ticket_number" "$@"
 }
 
 svn_help() {
+	echo "Called svn help: 1=$1 2=$2 3=$3"
 	if [ -z "$1" ]; then
-		$ORIGINAL help
+		$original_command help
 		echo -ne $Gr
 		echo "The following commands have been overloaded:"
 		echo " * svn add"
@@ -58,7 +86,7 @@ svn_help() {
 		echo " * svn us (update then status)"
 		echo -ne $R
 	else
-		$ORIGINAL help "$@"
+		$original_command help "$@"
 	fi
 }
 
@@ -66,10 +94,10 @@ hg_rm() {
 	if [ -z "$1" ]; then
 		ARGS=$(hg st $(hg root) | awk '/^\!/{print $2}' | xargs)
 		if [ -n "$ARGS" ]; then
-			echo $ORIGINAL rm $ARGS
-			$ORIGINAL rm $ARGS
+			echo $original_command rm $ARGS
+			$original_command rm $ARGS
 		fi
 	else
-		$ORIGINAL rm "$@"
+		$original_command rm "$@"
 	fi
 }
