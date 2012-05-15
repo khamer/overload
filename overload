@@ -7,9 +7,9 @@
 ## 
 OVERLOAD_VERSION="1.2"
 
-if [ ${0##*/} == 'bash' ]; then
-	if [ ${#*} -gt 0 ]; then
-		while [ ${#*} -gt 0 ]; do
+if [[ ${0##*/} == 'bash' ]]; then
+	if (( ${#*} > 0 )); then
+		while (( ${#*} > 0 )); do
 			eval "$1() { overload $1 \"\$@\"; }"
 			shift
 		done
@@ -46,7 +46,7 @@ To see what commands have been overloaded,
 		command="${script##*/}"
 
 		## If calling overload directly, make sure to not use the name of the script.
-		if [ $command == 'overload' ]; then
+		if [[ $command == 'overload' ]]; then
 			command="${1##*/}"
 			original_command="$command"
 			function_name="$(underscorize "$@")"
@@ -59,7 +59,7 @@ To see what commands have been overloaded,
 
 		## You can also put functions in your .bashrc or anywhere else that would
 		## ensure that they are defined for this script's environment.
-		if [ -e $HOME/.overloadrc ]; then
+		if [[ -e $HOME/.overloadrc ]]; then
 			source $HOME/.overloadrc
 		fi
 
@@ -67,10 +67,10 @@ To see what commands have been overloaded,
 		old_function_name=""
 		found=0
 		num_args=0
-		while [ "$function_name" != "$old_function_name" ]; do
+		while [[ "$function_name" != "$old_function_name" ]]; do
 			old_function_name="$function_name"
 
-			if [ "$(type -t $function_name)" == "function" ]; then
+			if [[ "$(type -t $function_name)" == "function" ]]; then
 				found=1
 				break
 			fi
@@ -81,7 +81,7 @@ To see what commands have been overloaded,
 
 		start_offset=$((${#@}-$num_args+1))
 
-		if [ $found -gt 0 ]; then
+		if (( $found > 0 )); then
 			## Call function with remaining arguments.
 			$function_name "${@:$start_offset:$num_args}"
 		else
