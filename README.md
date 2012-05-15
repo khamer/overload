@@ -44,3 +44,15 @@ I've provided one of my own .overloadrc files to show some examples. For example
   * svn ct – give it a ticket number, and it commits with the message "Completed Ticket #<TICKET NUMBER>"
 
 Currently, I assume bash.
+
+
+Configuring commands to always use overload
+-------------------------------------------
+
+After adding overload to your path, you can simply add
+
+    source overload svn hg
+
+To the bottom of your .bashrc (or equivalent.) For the .overloadrc I shared, I
+only overloaded 'svn' and 'hg', so those are the only two I have configured in
+my .bashrc.
