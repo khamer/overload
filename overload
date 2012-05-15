@@ -8,8 +8,8 @@
 OVERLOAD_VERSION="1.2"
 
 if [[ ${0##*/} == 'bash' ]]; then
-	if (( ${#*} > 0 )); then
-		while (( ${#*} > 0 )); do
+	if (( $# > 0 )); then
+		while (( $# > 0 )); do
 			eval "$1() { overload $1 \"\$@\"; }"
 			shift
 		done
@@ -79,7 +79,7 @@ To see what commands have been overloaded,
 			function_name="${function_name%_*}"
 		done
 
-		start_offset=$((${#@}-$num_args+1))
+		start_offset=$(($#-$num_args+1))
 
 		if (( $found > 0 )); then
 			## Call function with remaining arguments.
