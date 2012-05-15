@@ -1,4 +1,46 @@
-overload
-========
+Overload – customize your commands
+==================================
 
-Bash Script for defining different behavior for command-line applications.
+This repository contains various scripts I've put together for use with linux.
+
+
+Overview
+--------
+
+Overload started out with three goals:
+
+  * add better default behavior to commands that have poor default behavior,
+  * enhance existing options/flags for commands, and
+  * add additional functionality to existing commands in a way that is more
+    natural to use.
+
+It can be called directly – `overload svn ls` – or configured in your .bashrc
+file. It can also be setup using symbolic links, but I generally discourage
+that now.
+
+
+Defining commands
+-----------------
+
+The easiest way to define commands is by creating a .overloadrc file in your
+home directory. In this file, you should define bash functions that match the
+underscorized verison of command you'd like to match. For example,
+
+    svn_add() {
+    	if [ -z "$1" ]; then
+    		ARGS=$(svn st | awk '/^\?/{print $2}' | xargs)
+    		if [ -n "$ARGS" ]; then
+    			$original_command add $ARGS
+    		fi
+    	else
+    		$original_command add "$@"
+    	fi
+    }
+
+I've provided one of my own .overloadrc files to show some examples. For example, I have defined
+
+  * svn us – runs svn up and status
+  * svn commit – I force an svn up before every commit
+  * svn ct – give it a ticket number, and it commits with the message "Completed Ticket #<TICKET NUMBER>"
+
+Currently, I assume bash.

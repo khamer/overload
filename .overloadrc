@@ -1,0 +1,75 @@
+#!/bin/bash
+
+## Just some colors for convienence.
+Gr="\033[32;1m"
+B="\033[4m"
+R="\033[0m"
+
+overload_echo() {
+	echo 0=$0 1=$1 2=$2 3=$3
+}
+
+svn_add() {
+	if [ -z "$1" ]; then
+		ARGS=$(svn st | awk '/^\?/{print $2}' | xargs)
+		if [ -n "$ARGS" ]; then
+			$ORIGINAL add $ARGS
+		fi
+	else
+		$ORIGINAL add "$@"
+	fi
+}
+
+svn_revert() {
+	if [ -z "$1" ]; then
+		ARGS=$(svn st | awk '/^M/{print $2}' | xargs)
+		if [ -n "$ARGS" ]; then
+			$ORIGINAL revert $ARGS
+		fi
+	else
+		$ORIGINAL revert "$@"
+	fi
+}
+
+svn_del() {
+	if [ -z "$1" ]; then
+		ARGS=$(svn st | awk '/^\!/{print $2}' | xargs)
+		if [ -n "$ARGS" ]; then
+			$ORIGINAL del $ARGS
+		fi
+	else
+		$ORIGINAL del "$@"
+	fi
+}
+
+svn_us() {
+	$ORIGINAL up "$@"
+	$ORIGINAL st "$@"
+}
+
+svn_help() {
+	if [ -z "$1" ]; then
+		$ORIGINAL help
+		echo -ne $Gr
+		echo "The following commands have been overloaded:"
+		echo " * svn add"
+		echo " * svn del"
+		echo " * svn revert"
+		echo " * svn us (update then status)"
+		echo -ne $R
+	else
+		$ORIGINAL help "$@"
+	fi
+}
+
+hg_rm() {
+	if [ -z "$1" ]; then
+		ARGS=$(hg st $(hg root) | awk '/^\!/{print $2}' | xargs)
+		if [ -n "$ARGS" ]; then
+			echo $ORIGINAL rm $ARGS
+			$ORIGINAL rm $ARGS
+		fi
+	else
+		$ORIGINAL rm "$@"
+	fi
+}

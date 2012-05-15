@@ -1,0 +1,95 @@
+#!/bin/bash
+## Overload allows you to define alternate behavior for commands based upon their parameters.
+## Configuration is done by defining functions in $HOME/.overloadrc or even just in your bashrc.
+##
+## @Author Kevin Hamer <khamer@becauserobots.com>
+##
+## 
+OVERLOAD_VERSION="1.2"
+
+if [ ${0##*/} == 'bash' ]; then
+	if [ ${#*} -gt 0 ]; then
+		while [ ${#*} -gt 0 ]; do
+			eval "$1() { overload $1 \"\$@\"; }"
+			shift
+		done
+	else
+		echo Overloaded commands: $(declare -f | grep -B 2 overload | awk '/\(\)/{print $1}' | xargs)
+	fi
+else
+
+	function help() {
+		echo "usage: overload COMMAND [ARGS]
+Overload written by Kevin Hamer, verson $OVERLOAD_VERSION.
+
+Overload allows you to define different behaviors for commands through bash
+functions. To enable overload for a command,
+
+    source overload COMMAND [ COMMAND [ ... ] ]
+
+To see what commands have been overloaded,
+    source overload
+"
+	}
+
+	function version() {
+		echo "Overload: v$OVERLOAD_VERSION"
+	}
+
+	function underscorize() {
+		underscorize="$*"
+		echo "${underscorize// /_}"
+	}
+
+	function main() {
+		script="$0"
+		command="${script##*/}"
+
+		## If calling overload directly, make sure to not use the name of the script.
+		if [ $command == 'overload' ]; then
+			command="${1##*/}"
+			original_command="$command"
+			function_name="$(underscorize "$@")"
+		else
+			## This command finds the first 'non-overload' version of $command on
+			## the path.
+			original_command="$(which -a $command | grep -v "$script" | head -n 1)"
+			function_name="$(underscorize $command "$@")"
+		fi
+
+		## You can also put functions in your .bashrc or anywhere else that would
+		## ensure that they are defined for this script's environment.
+		if [ -e $HOME/.overloadrc ]; then
+			source $HOME/.overloadrc
+		fi
+
+		## Tries to find matching functions, starting with the longest name first.
+		old_function_name=""
+		found=0
+		num_args=0
+		while [ "$function_name" != "$old_function_name" ]; do
+			old_function_name="$function_name"
+
+			if [ "$(type -t $function_name)" == "function" ]; then
+				found=1
+				break
+			fi
+
+			num_args=$(($num_args+1))
+			function_name="${function_name%_*}"
+		done
+
+		start_offset=$((${#@}-$num_args+1))
+
+		if [ $found -gt 0 ]; then
+			## Call function with remaining arguments.
+			$function_name "${@:$start_offset:$num_args}"
+		else
+			## Call first 'non-overload' version of $command.
+			"$@"
+		fi
+	}
+
+	main "$@"
+
+fi
