@@ -1,6 +1,8 @@
 Overload – customize your commands
 ==================================
 
+FOR THE CURRENT VERSION OF OVERLOAD, see the khamer/bin repository instead.
+
 Overview
 --------
 
